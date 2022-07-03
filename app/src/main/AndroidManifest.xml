@@ -14,7 +14,7 @@
             android:label="@string/home_activity_title"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".auth.view.LoginActivity"
             android:label="@string/login_activity_title"
             android:exported="true">
             <intent-filter>
