@@ -4,4 +4,6 @@
     <string name="login_activity_welcome_txt">Chào mừng đến với ứng dụng!</string>
     <string name="home_activity_txt_welcome_user_with_argument">Chào mừng, %s!</string>
     <string name="option_sign_out">Đăng xuất</string>
+    <string name="home_activity_title">Trang chủ</string>
+    <string name="login_activity_title">Đăng nhập</string>
 </resources>
