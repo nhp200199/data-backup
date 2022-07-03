@@ -2,4 +2,5 @@
     <string name="app_name">DataBackup</string>
     <string name="login_activity_btn_google_login_txt">Đăng nhập với Google</string>
     <string name="login_activity_welcome_txt">Chào mừng đến với ứng dụng!</string>
+    <string name="home_activity_txt_welcome_user_with_argument">Chào mừng, %s!</string>
 </resources>
