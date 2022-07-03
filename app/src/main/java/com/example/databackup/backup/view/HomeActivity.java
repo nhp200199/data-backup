@@ -1,6 +1,7 @@
-package com.example.databackup;
+package com.example.databackup.backup.view;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,16 +9,21 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.example.databackup.R;
+import com.example.databackup.auth.repository.AuthRepository;
 import com.example.databackup.auth.view.LoginActivity;
+import com.example.databackup.backup.viewmodel.HomeViewModel;
 import com.example.databackup.databinding.ActivityHomeBinding;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class HomeActivity extends AppCompatActivity {
     public static final String EXTRA_USER_EMAIL = "user_email";
     private String userEmail = "...";
     private ActivityHomeBinding binding;
-
-    private FirebaseAuth mAuth;
+    private HomeViewModel mHomeViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +36,8 @@ public class HomeActivity extends AppCompatActivity {
             userEmail = receivedIntent.getStringExtra(EXTRA_USER_EMAIL);
         }
 
-        mAuth = FirebaseAuth.getInstance();
+        mHomeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        mHomeViewModel.init(this);
 
         binding.tvWelcomeUserEmail.setText(String.format(getString(R.string.home_activity_txt_welcome_user_with_argument), userEmail));
     }
@@ -55,15 +62,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void signOut() {
-        mAuth.signOut();
+        mHomeViewModel.signOut(this);
         startActivity(new Intent(this, LoginActivity.class));
         finish();
-//        mGoogleSignInClient.signOut()
-//                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        // ...
-//                    }
-//                });
     }
 }
