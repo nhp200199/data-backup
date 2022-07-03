@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends AppCompatActivity {
@@ -34,6 +35,12 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            navigateToHome(currentUser);
+        }
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -48,6 +55,13 @@ public class LoginActivity extends AppCompatActivity {
             }
             signIn();
         });
+    }
+
+    private void navigateToHome(FirebaseUser currentUser) {
+        Intent homeActivityIntent = new Intent(this, HomeActivity.class);
+        homeActivityIntent.putExtra(HomeActivity.EXTRA_USER_EMAIL, currentUser.getEmail());
+        startActivity(homeActivityIntent);
+        finish();
     }
 
     private void signIn() {
@@ -84,6 +98,7 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnSuccessListener(this, authResult -> {
                     Toast.makeText(LoginActivity.this, authResult.getUser().getEmail(), Toast.LENGTH_SHORT).show();
+                    navigateToHome(authResult.getUser());
                 })
                 .addOnFailureListener(this, e -> Toast.makeText(LoginActivity.this, "Authentication failed.",
                         Toast.LENGTH_SHORT).show());
