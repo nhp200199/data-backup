@@ -23,10 +23,18 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 public class AuthRepository {
+    public enum LoginStatus {
+        INITIAL,
+        IN_PROGRESS,
+        SUCCESS,
+        FAIL,
+    }
+
     private static final String TAG = AuthRepository.class.getSimpleName();
     private GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
     private MutableLiveData<FirebaseUser> mAuthenticatedUser = new MutableLiveData<FirebaseUser>();
+    private MutableLiveData<AuthRepository.LoginStatus> loginStatusMutableLiveData = new MutableLiveData<LoginStatus>(LoginStatus.INITIAL);
 
     private static AuthRepository instance;
 
@@ -94,15 +102,18 @@ public class AuthRepository {
 
     public void firebaseAuthWithGoogle(Context context, GoogleSignInAccount act) {
         if (context instanceof Activity) {
+            loginStatusMutableLiveData.setValue(LoginStatus.IN_PROGRESS);
             AuthCredential credential = GoogleAuthProvider.getCredential(act.getIdToken(), null);
             mAuth.signInWithCredential(credential)
                     .addOnSuccessListener((Activity) context, authResult -> {
                         Log.i(TAG, "Successfully sign user in");
                         Log.i(TAG, "User's sign in email: " + authResult.getUser().getEmail());
+                        loginStatusMutableLiveData.setValue(LoginStatus.SUCCESS);
                         mAuthenticatedUser.setValue(authResult.getUser());
                     })
                     .addOnFailureListener((Activity) context, e -> {
                         Log.e(TAG, "Failed to authenticate with google. Error is: " + e);
+                        loginStatusMutableLiveData.setValue(LoginStatus.FAIL);
                     });
         }
         else {
@@ -112,5 +123,9 @@ public class AuthRepository {
 
     public LiveData<FirebaseUser> getAuthenticatedUser() {
         return mAuthenticatedUser;
+    }
+
+    public LiveData<LoginStatus> getLoginStatusLiveData() {
+        return loginStatusMutableLiveData;
     }
 }

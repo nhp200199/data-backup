@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.databackup.BaseActivity;
 import com.example.databackup.backup.view.HomeActivity;
 import com.example.databackup.auth.viewmodel.LoginViewModel;
 import com.example.databackup.databinding.ActivityMainBinding;
@@ -16,7 +18,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
     public static final int SIGN_IN_REQUEST_CODE = 123;
     private ActivityMainBinding binding;
@@ -35,16 +37,35 @@ public class LoginActivity extends AppCompatActivity {
             navigateToHome(mLoginViewModel.getFirebaseUser());
         }
 
+        setUpObservables();
+
+        binding.btnGoogleSignIn.setOnClickListener(v -> {
+            Intent googleSignInIntent = mLoginViewModel.getGoogleSignInIntent();
+            if (googleSignInIntent != null) {
+                startActivityForResult(googleSignInIntent, SIGN_IN_REQUEST_CODE);
+            }
+        });
+    }
+
+    private void setUpObservables() {
         mLoginViewModel.getAuthenticatedUser().observe(this, firebaseUser -> {
             if (firebaseUser != null) {
                 navigateToHome(firebaseUser);
             }
         });
 
-        binding.btnGoogleSignIn.setOnClickListener(v -> {
-            Intent googleSignInIntent = mLoginViewModel.getGoogleSignInIntent();
-            if (googleSignInIntent != null) {
-                startActivityForResult(googleSignInIntent, SIGN_IN_REQUEST_CODE);
+        mLoginViewModel.getLoginStatusLiveData().observe(this, loginStatus -> {
+            switch (loginStatus) {
+                case IN_PROGRESS:
+                    showLoadingDialog();
+                    break;
+                case SUCCESS:
+                    Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAIL:
+                    showInformationPopup("Thất bại", "Có lỗi trong quá trình thực hiện. Vui lòng thử lại");
+                    break;
+                default: break;
             }
         });
     }

@@ -28,9 +28,11 @@ import com.google.firebase.auth.GoogleAuthProvider;
 public class LoginViewModel extends ViewModel {
     private static final String TAG = LoginViewModel.class.getSimpleName();
     private AuthRepository mAuthRepository;
+    private LiveData<AuthRepository.LoginStatus> loginStatusLiveData;
 
     public void init(Context context) {
         mAuthRepository = AuthRepository.getInstance(context);
+        loginStatusLiveData = mAuthRepository.getLoginStatusLiveData();
     }
 
     public boolean isUserSignedIn() {
@@ -51,5 +53,13 @@ public class LoginViewModel extends ViewModel {
 
     public LiveData<FirebaseUser> getAuthenticatedUser() {
         return mAuthRepository.getAuthenticatedUser();
+    }
+
+    public LiveData<AuthRepository.LoginStatus> getLoginStatusLiveData() {
+        return loginStatusLiveData;
+    }
+
+    public LiveData<String> getLoginErrorLiveData() {
+        return loginErrorLiveData;
     }
 }
