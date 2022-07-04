@@ -58,8 +58,4 @@ public class LoginViewModel extends ViewModel {
     public LiveData<AuthRepository.LoginStatus> getLoginStatusLiveData() {
         return loginStatusLiveData;
     }
-
-    public LiveData<String> getLoginErrorLiveData() {
-        return loginErrorLiveData;
-    }
 }

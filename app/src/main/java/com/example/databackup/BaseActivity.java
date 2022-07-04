@@ -2,8 +2,10 @@ package com.example.databackup;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.databackup.databinding.DialogLoadingBinding;
 import com.example.databackup.databinding.DialogOperationErrorBinding;
@@ -47,5 +49,16 @@ public class BaseActivity extends AppCompatActivity {
             dialog.dismiss();
             dialog = null;
         }
+    }
+
+    protected boolean checkPermissions(String[] neededPermissions) {
+        if (neededPermissions == null || neededPermissions.length == 0) {
+            return true;
+        }
+        boolean allGranted = true;
+        for (String neededPermission : neededPermissions) {
+            allGranted &= ContextCompat.checkSelfPermission(this, neededPermission) == PackageManager.PERMISSION_GRANTED;
+        }
+        return allGranted;
     }
 }
