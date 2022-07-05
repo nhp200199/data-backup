@@ -59,7 +59,7 @@ public class HomeActivity extends BaseActivity {
                 ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS,     ACTION_REQUEST_PERMISSIONS);
             }
             else {
-                RecordsRepository.getInstance(HomeActivity.this).backUpData(HomeActivity.this);
+                new RecordsRepository().backUpData(HomeActivity.this);
             }
         });
     }
@@ -73,7 +73,7 @@ public class HomeActivity extends BaseActivity {
         }
         if (requestCode == ACTION_REQUEST_PERMISSIONS) {
             if (isAllGranted) {
-                RecordsRepository.getInstance(HomeActivity.this).backUpData(HomeActivity.this);
+                new RecordsRepository().backUpData(HomeActivity.this);
             } else {
                 Toast.makeText(this, "Bạn cần cho quyền để thực hiện tác vụ", Toast.LENGTH_SHORT).show();
             }
