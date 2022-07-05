@@ -31,6 +31,8 @@ public class HomeActivity extends BaseActivity {
     public static final String EXTRA_USER_EMAIL = "user_email";
     private static final String[] NEEDED_PERMISSIONS = new String[]{
             Manifest.permission.READ_CONTACTS,
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.READ_SMS,
     };
     private static final int ACTION_REQUEST_PERMISSIONS = 444;
     private String userEmail = "...";
@@ -57,7 +59,7 @@ public class HomeActivity extends BaseActivity {
                 ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS,     ACTION_REQUEST_PERMISSIONS);
             }
             else {
-                RecordsRepository.getInstance().backUpData();
+                RecordsRepository.getInstance(HomeActivity.this).backUpData(HomeActivity.this);
             }
         });
     }
@@ -71,7 +73,7 @@ public class HomeActivity extends BaseActivity {
         }
         if (requestCode == ACTION_REQUEST_PERMISSIONS) {
             if (isAllGranted) {
-                RecordsRepository.getInstance().backUpData();
+                RecordsRepository.getInstance(HomeActivity.this).backUpData(HomeActivity.this);
             } else {
                 Toast.makeText(this, "Bạn cần cho quyền để thực hiện tác vụ", Toast.LENGTH_SHORT).show();
             }
