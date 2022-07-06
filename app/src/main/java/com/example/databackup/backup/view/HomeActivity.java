@@ -29,6 +29,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class HomeActivity extends BaseActivity {
     public static final String EXTRA_USER_EMAIL = "user_email";
@@ -42,6 +44,7 @@ public class HomeActivity extends BaseActivity {
     private String userEmail = "...";
     private ActivityHomeBinding binding;
     private HomeViewModel mHomeViewModel;
+    private CompositeDisposable viewSubscription = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,25 +69,45 @@ public class HomeActivity extends BaseActivity {
                 mHomeViewModel.backUpData(HomeActivity.this);
             }
         });
+    }
 
-        mHomeViewModel.getBackUpStatusObservable().observeOn(AndroidSchedulers.mainThread()).subscribe(status -> {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        makeViewSubscriptions();
+    }
+
+    private void makeViewSubscriptions() {
+        Disposable disposable = mHomeViewModel.getBackUpStatusObservable().observeOn(AndroidSchedulers.mainThread()).subscribe(status -> {
             Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
-          switch (status) {
-              case IN_PROGRESS:
-                  Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
-                  break;
-              case FAIL:
-                  Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
-                  break;
-              case SUCCESS:
-                  Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
-                  break;
-              default:
-          }
+            switch (status) {
+                case IN_PROGRESS:
+                    Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAIL:
+                    Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
+                    break;
+                case SUCCESS:
+                    Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+            }
         }, e -> {
             e.printStackTrace();
             Log.e(TAG, "ERROR WITH BACK UP STATUS. " + e.toString());
         });
+
+        viewSubscription.add(disposable);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        clearViewSubscriptions();
+    }
+
+    private void clearViewSubscriptions() {
+        viewSubscription.dispose();
     }
 
     @Override
@@ -126,5 +149,12 @@ public class HomeActivity extends BaseActivity {
         mHomeViewModel.signOut(this);
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHomeViewModel.tearDown();
+        binding = null;
     }
 }

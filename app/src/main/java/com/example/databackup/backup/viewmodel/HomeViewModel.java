@@ -8,29 +8,46 @@ import com.example.databackup.auth.repository.AuthRepository;
 import com.example.databackup.backup.repository.RecordsRepository;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.subjects.BehaviorSubject;
 
 public class HomeViewModel extends ViewModel {
+    public enum BackUpStatus {
+        INITIAL,
+        IN_PROGRESS,
+        SUCCESS,
+        FAIL,
+    }
+
     private static final String TAG = HomeViewModel.class.getSimpleName();
     private AuthRepository mAuthRepository;
     private RecordsRepository mRecordsRepository;
-    private Observable<RecordsRepository.BackUpStatus> backUpStatusObservable;
+    private BehaviorSubject<BackUpStatus> backUpStatusSubject = BehaviorSubject.createDefault(BackUpStatus.INITIAL);
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public void init(Context context) {
         mAuthRepository = AuthRepository.getInstance(context);
         mRecordsRepository = new RecordsRepository();
-
-        backUpStatusObservable = mRecordsRepository.getBackUpStatusObservable();
     }
 
     public void signOut(Context context) {
         mAuthRepository.signOut(context);
     }
 
-    public Observable<RecordsRepository.BackUpStatus> getBackUpStatusObservable() {
-        return backUpStatusObservable;
+    public Observable<BackUpStatus> getBackUpStatusObservable() {
+        return backUpStatusSubject.hide();
     }
 
     public void backUpData(Context context) {
-        mRecordsRepository.backUpData(context);
+        backUpStatusSubject.onNext(BackUpStatus.IN_PROGRESS);
+        Disposable disposable = mRecordsRepository.backUpData(context).subscribe(backUpData -> {
+            backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
+        }, e -> backUpStatusSubject.onNext(BackUpStatus.FAIL));
+        compositeDisposable.add(disposable);
+    }
+
+    public void tearDown() {
+        compositeDisposable.dispose();
     }
 }
