@@ -7,13 +7,19 @@ import android.provider.ContactsContract;
 import android.provider.Telephony;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.CallLogModel;
 import com.example.databackup.backup.model.Contact;
 import com.example.databackup.backup.model.SmsModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -23,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.subjects.BehaviorSubject;
 
 public class RecordsRepository {
     private static final String TAG = RecordsRepository.class.getSimpleName();
@@ -30,16 +37,47 @@ public class RecordsRepository {
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private StorageReference rootStorageRef;
-
+    private BehaviorSubject<List<Long>> recordsSubject = BehaviorSubject.createDefault(new ArrayList<Long>());
 
     public RecordsRepository() {
         rootStorageRef = storage.getReference(ROOT);
     }
 
+    public void fetchAll(String email) {
+        StorageReference listRef = rootStorageRef.child(email);
+        List<Long> records = new ArrayList<>();
+
+        listRef.listAll()
+                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                    @Override
+                    public void onSuccess(ListResult listResult) {
+                        for (StorageReference item : listResult.getItems()) {
+                            try {
+                                String timeStampFromJsonFile = item.getName().substring(0, item.getName().indexOf('.'));
+                                records.add(Long.parseLong(timeStampFromJsonFile));
+                            } catch (Exception e){
+                                e.printStackTrace();
+                                Log.e(TAG, "Error when parsing timestamps from json file's name");
+                                recordsSubject.onError(e);
+                            }
+                        }
+                        recordsSubject.onNext(records);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "Error when fetching records from Firebase " + e.toString());
+                        recordsSubject.onError(e);
+                    }
+                });
+    }
+
     private Observable<BackUpData> retrieveBackUpData(Context context) {
         return Observable.zip(getContacts(context), getSms(context), getCallLogs(context), (contacts, smsModels, callLogModels) -> {
             BackUpData a = new BackUpData(new Date().getTime(), contacts, smsModels, callLogModels);
-            Log.i(TAG, "JSON representation: " + a.toJson());
+//            Log.i(TAG, "JSON representation: " + a.toJson());
             return a;
         });
     }
@@ -49,11 +87,16 @@ public class RecordsRepository {
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
            return retrieveBackUpData(context).flatMap(backUpData -> {
+               // Create file metadata including the content type
+               StorageMetadata metadata = new StorageMetadata.Builder()
+                       .setContentType("application/json")
+                       .build();
+
                 backUpData.setBackUpDate(backUpDate);
                 String email = currentUser.getEmail();
                 StorageReference jsonDataRef = rootStorageRef.child(email + "/" + backUpDate + ".json");
                 return Observable.create(emitter -> {
-                    UploadTask uploadTask = jsonDataRef.putBytes(backUpData.toJson().getBytes(StandardCharsets.UTF_8));
+                    UploadTask uploadTask = jsonDataRef.putBytes(backUpData.toJson().getBytes(StandardCharsets.UTF_8), metadata);
                     uploadTask.addOnSuccessListener(task -> {
                         emitter.onNext(backUpData);
                         emitter.onComplete();
@@ -185,5 +228,15 @@ public class RecordsRepository {
                     cursor.close();
             }
         });
+    }
+
+    public void putRecord(long record) {
+        List<Long> currentRecords = recordsSubject.getValue();
+        currentRecords.add(0, record);
+        recordsSubject.onNext(currentRecords);
+    }
+
+    public Observable<List<Long>> getRecordsObservable() {
+        return recordsSubject.hide();
     }
 }

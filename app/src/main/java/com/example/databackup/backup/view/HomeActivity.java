@@ -60,6 +60,8 @@ public class HomeActivity extends BaseActivity {
         mHomeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         mHomeViewModel.init(this);
 
+        mHomeViewModel.fetchRecords(userEmail);
+
         binding.tvWelcomeUserEmail.setText(String.format(getString(R.string.home_activity_txt_welcome_user_with_argument), userEmail));
         binding.btnBackUp.setOnClickListener(v -> {
             if (!checkPermissions(NEEDED_PERMISSIONS)) {
@@ -78,7 +80,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void makeViewSubscriptions() {
-        Disposable disposable = mHomeViewModel.getBackUpStatusObservable().observeOn(AndroidSchedulers.mainThread()).subscribe(status -> {
+        Disposable backUpStatusDisposable = mHomeViewModel.getBackUpStatusObservable().observeOn(AndroidSchedulers.mainThread()).subscribe(status -> {
             Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
             switch (status) {
                 case IN_PROGRESS:
@@ -97,7 +99,12 @@ public class HomeActivity extends BaseActivity {
             Log.e(TAG, "ERROR WITH BACK UP STATUS. " + e.toString());
         });
 
-        viewSubscription.add(disposable);
+        Disposable recordsDisposable = mHomeViewModel.getRecordsObservable().subscribe(longs -> {
+            Log.i(TAG, "number of records: " + longs.size());
+        });
+
+        viewSubscription.add(backUpStatusDisposable);
+        viewSubscription.add(recordsDisposable);
     }
 
     @Override
