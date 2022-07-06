@@ -10,6 +10,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,6 +28,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+
 public class HomeActivity extends BaseActivity {
     public static final String EXTRA_USER_EMAIL = "user_email";
     private static final String[] NEEDED_PERMISSIONS = new String[]{
@@ -34,6 +37,7 @@ public class HomeActivity extends BaseActivity {
             Manifest.permission.READ_CALL_LOG,
             Manifest.permission.READ_SMS,
     };
+    private static final String TAG = HomeActivity.class.getSimpleName();
     private static final int ACTION_REQUEST_PERMISSIONS = 444;
     private String userEmail = "...";
     private ActivityHomeBinding binding;
@@ -59,8 +63,27 @@ public class HomeActivity extends BaseActivity {
                 ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS,     ACTION_REQUEST_PERMISSIONS);
             }
             else {
-                new RecordsRepository().backUpData(HomeActivity.this);
+                mHomeViewModel.backUpData(HomeActivity.this);
             }
+        });
+
+        mHomeViewModel.getBackUpStatusObservable().observeOn(AndroidSchedulers.mainThread()).subscribe(status -> {
+            Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
+          switch (status) {
+              case IN_PROGRESS:
+                  Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
+                  break;
+              case FAIL:
+                  Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
+                  break;
+              case SUCCESS:
+                  Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+                  break;
+              default:
+          }
+        }, e -> {
+            e.printStackTrace();
+            Log.e(TAG, "ERROR WITH BACK UP STATUS. " + e.toString());
         });
     }
 
@@ -73,7 +96,7 @@ public class HomeActivity extends BaseActivity {
         }
         if (requestCode == ACTION_REQUEST_PERMISSIONS) {
             if (isAllGranted) {
-                new RecordsRepository().backUpData(HomeActivity.this);
+                mHomeViewModel.backUpData(HomeActivity.this);
             } else {
                 Toast.makeText(this, "Bạn cần cho quyền để thực hiện tác vụ", Toast.LENGTH_SHORT).show();
             }
