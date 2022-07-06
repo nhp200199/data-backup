@@ -1,17 +1,21 @@
 package com.example.databackup.backup.model;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BackUpData {
+    long backUpDate;
     List<Contact> contacts = new ArrayList<Contact>();
     List<SmsModel> smsList = new ArrayList<SmsModel>();
     List<CallLogModel> callLogs = new ArrayList<CallLogModel>();
 
-    public BackUpData(List<Contact> contacts, List<SmsModel> smsList, List<CallLogModel> callLogs) {
+    public BackUpData(long backUpDate, List<Contact> contacts, List<SmsModel> smsList, List<CallLogModel> callLogs) {
         this.contacts = contacts;
         this.smsList = smsList;
         this.callLogs = callLogs;
+        this.backUpDate = backUpDate;
     }
 
     public List<Contact> getContacts() {
@@ -36,5 +40,17 @@ public class BackUpData {
 
     public void setCallLogs(List<CallLogModel> callLogs) {
         this.callLogs = callLogs;
+    }
+
+    public long getBackUpDate() {
+        return backUpDate;
+    }
+
+    public void setBackUpDate(long backUpDate) {
+        this.backUpDate = backUpDate;
+    }
+
+    public String toJson() {
+        return new Gson().toJson(this);
     }
 }

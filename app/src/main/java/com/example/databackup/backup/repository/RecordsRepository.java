@@ -1,51 +1,74 @@
 package com.example.databackup.backup.repository;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.Telephony;
 import android.util.Log;
 
-import com.example.databackup.R;
-import com.example.databackup.auth.repository.AuthRepository;
 import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.CallLogModel;
 import com.example.databackup.backup.model.Contact;
 import com.example.databackup.backup.model.SmsModel;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.subjects.BehaviorSubject;
 
 public class RecordsRepository {
     private static final String TAG = RecordsRepository.class.getSimpleName();
+    private static final String ROOT = "data/";
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
+    private StorageReference rootStorageRef;
 
-    public RecordsRepository() {}
+
+    public RecordsRepository() {
+        rootStorageRef = storage.getReference(ROOT);
+    }
+
+    private Observable<BackUpData> retrieveBackUpData(Context context) {
+        return Observable.zip(getContacts(context), getSms(context), getCallLogs(context), (contacts, smsModels, callLogModels) -> {
+            BackUpData a = new BackUpData(new Date().getTime(), contacts, smsModels, callLogModels);
+            Log.i(TAG, "JSON representation: " + a.toJson());
+            return a;
+        });
+    }
 
     public Observable<BackUpData> backUpData(Context context) {
-        return Observable.zip(getContacts(context), getSms(context), getCallLogs(context), BackUpData::new);
-//        Disposable subscribe = .subscribe(backUpData -> {
-//            Log.i(TAG, "contacts: " + backUpData.getContacts().size());
-//            Log.i(TAG, "sms: " + backUpData.getSmsList().size());
-//            Log.i(TAG, "call logs: " + backUpData.getCallLogs().size());
-//            backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
-//        }, e -> {
-//            backUpStatusSubject.onNext(BackUpStatus.FAIL);
-//        });
-//        compositeDisposable.add(subscribe);
-//        getContacts(context);
-//        getCallLogs(context);
-//        getSms(context);
+        long backUpDate = new Date().getTime();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser != null) {
+           return retrieveBackUpData(context).flatMap(backUpData -> {
+                backUpData.setBackUpDate(backUpDate);
+                String email = currentUser.getEmail();
+                StorageReference jsonDataRef = rootStorageRef.child(email + "/" + backUpDate + ".json");
+                return Observable.create(emitter -> {
+                    UploadTask uploadTask = jsonDataRef.putBytes(backUpData.toJson().getBytes(StandardCharsets.UTF_8));
+                    uploadTask.addOnSuccessListener(task -> {
+                        emitter.onNext(backUpData);
+                        emitter.onComplete();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error when back up data to Firebase. " + e.toString());
+                        e.printStackTrace();
+                        emitter.onError(e);
+                    });
+                });
+            });
+        } else {
+            Log.i(TAG, "There is no user logged in");
+            return Observable.error(Exception::new);
+        }
     }
 
     private Observable<List<Contact>> getContacts(Context context) {
