@@ -28,31 +28,21 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class RecordsRepository {
-    public enum BackUpStatus {
-        INITIAL,
-        IN_PROGRESS,
-        SUCCESS,
-        FAIL,
-    }
-
     private static final String TAG = RecordsRepository.class.getSimpleName();
-
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private BehaviorSubject<BackUpStatus> backUpStatusSubject = BehaviorSubject.createDefault(BackUpStatus.INITIAL);
 
     public RecordsRepository() {}
 
-    public void backUpData(Context context) {
-        backUpStatusSubject.onNext(BackUpStatus.IN_PROGRESS);
-        Disposable subscribe = Observable.zip(getContacts(context), getSms(context), getCallLogs(context), BackUpData::new).subscribe(backUpData -> {
-            Log.i(TAG, "contacts: " + backUpData.getContacts().size());
-            Log.i(TAG, "sms: " + backUpData.getSmsList().size());
-            Log.i(TAG, "call logs: " + backUpData.getCallLogs().size());
-            backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
-        }, e -> {
-            backUpStatusSubject.onNext(BackUpStatus.FAIL);
-        });
-        compositeDisposable.add(subscribe);
+    public Observable<BackUpData> backUpData(Context context) {
+        return Observable.zip(getContacts(context), getSms(context), getCallLogs(context), BackUpData::new);
+//        Disposable subscribe = .subscribe(backUpData -> {
+//            Log.i(TAG, "contacts: " + backUpData.getContacts().size());
+//            Log.i(TAG, "sms: " + backUpData.getSmsList().size());
+//            Log.i(TAG, "call logs: " + backUpData.getCallLogs().size());
+//            backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
+//        }, e -> {
+//            backUpStatusSubject.onNext(BackUpStatus.FAIL);
+//        });
+//        compositeDisposable.add(subscribe);
 //        getContacts(context);
 //        getCallLogs(context);
 //        getSms(context);
@@ -172,13 +162,5 @@ public class RecordsRepository {
                     cursor.close();
             }
         });
-    }
-
-    public Observable<BackUpStatus> getBackUpStatusObservable() {
-        return backUpStatusSubject.hide();
-    }
-
-    public void tearDown() {
-        compositeDisposable.dispose();
     }
 }
