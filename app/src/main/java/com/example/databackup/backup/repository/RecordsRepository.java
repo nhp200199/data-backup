@@ -161,9 +161,10 @@ public class RecordsRepository {
                 final int durationIndex = cursor.getColumnIndex(CallLog.Calls.DURATION);
 
                 long date, duration;
-                String type, number;
+                String number;
+                int type;
                 while (cursor.moveToNext()) {
-                    type = cursor.getString(typeIndex);
+                    type = cursor.getInt(typeIndex);
                     number = cursor.getString(numberIndex);
                     date = cursor.getLong(dateIndex);
                     duration = cursor.getLong(durationIndex);

@@ -27,7 +27,9 @@ public class DataOverviewActivity extends AppCompatActivity {
         }
 
         binding.callLogsContainer.setOnClickListener(v -> {
-
+            Intent intent = new Intent(DataOverviewActivity.this, CallLogsActivity.class);
+            intent.putExtra(EXTRA_DATA_ID, dataId);
+            startActivity(intent);
         });
 
         binding.smsContainer.setOnClickListener(v -> {

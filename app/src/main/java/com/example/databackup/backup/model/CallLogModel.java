@@ -3,10 +3,10 @@ package com.example.databackup.backup.model;
 public class CallLogModel {
     long date;
     long duration;
-    String callType;
+    int callType;
     String number;
 
-    public CallLogModel(long date, long duration, String callType, String number) {
+    public CallLogModel(long date, long duration, int callType, String number) {
         this.date = date;
         this.duration = duration;
         this.callType = callType;
@@ -29,11 +29,11 @@ public class CallLogModel {
         this.duration = duration;
     }
 
-    public String getCallType() {
+    public int getCallType() {
         return callType;
     }
 
-    public void setCallType(String callType) {
+    public void setCallType(int callType) {
         this.callType = callType;
     }
 
