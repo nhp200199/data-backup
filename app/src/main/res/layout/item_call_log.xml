@@ -10,23 +10,23 @@
         android:id="@+id/tv_call_log_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sdt: abc"/>
+        android:text="@string/call_log_item_txt_number_with_argument"/>
 
     <TextView
         android:id="@+id/tv_call_log_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Loai cuoc goi: abc"/>
+        android:text="@string/call_log_item_txt_type_with_argument"/>
 
     <TextView
         android:id="@+id/tv_call_log_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ngay thuc hien: abc"/>
+        android:text="@string/call_log_item_txt_date_with_argument"/>
 
     <TextView
         android:id="@+id/tv_call_log_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Thoi gian: abc"/>
+        android:text="@string/call_log_item_txt_duration_with_argument"/>
 </LinearLayout>

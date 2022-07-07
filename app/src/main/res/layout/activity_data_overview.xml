@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Thông tin liên hệ"/>
+            android:text="@string/data_overview_activity_txt_contact"/>
 
         <ImageView
             android:layout_width="24dp"
@@ -41,7 +41,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Lịch sử cuộc gọi"/>
+            android:text="@string/data_overview_activity_txt_call_lpg"/>
 
         <ImageView
             android:layout_width="24dp"
@@ -63,7 +63,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Tin nhắn"/>
+            android:text="@string/data_overview_activity_txt_sms"/>
 
         <ImageView
             android:layout_width="24dp"

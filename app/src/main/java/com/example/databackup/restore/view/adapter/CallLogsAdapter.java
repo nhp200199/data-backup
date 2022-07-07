@@ -21,10 +21,12 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.ViewHo
 
     private List<CallLogModel> callLogs;
     private LayoutInflater mInflater;
+    private Context context;
 
     public CallLogsAdapter(Context context, List<CallLogModel> logModels) {
         this.mInflater = LayoutInflater.from(context);
         this.callLogs = logModels;
+        this.context = context;
     }
 
     @NonNull
@@ -37,18 +39,18 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull CallLogsAdapter.ViewHolder holder, int position) {
         CallLogModel callLog = callLogs.get(position);
-        holder.tvCallLogNumber.setText(callLog.getNumber());
-        holder.tvCallLogDuration.setText(String.valueOf(callLog.getDuration()));
+        holder.tvCallLogNumber.setText(context.getString(R.string.call_log_item_txt_number_with_argument, callLog.getNumber()));
+        holder.tvCallLogDuration.setText(context.getString(R.string.call_log_item_txt_duration_with_argument, String.valueOf(callLog.getDuration())));
 
         try {
             Date date = new Date(callLog.getDate());
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             String formattedDate = sdf.format(date);
-            holder.tvCallLogDate.setText(formattedDate);
+            holder.tvCallLogDate.setText(context.getString(R.string.call_log_item_txt_date_with_argument, formattedDate));
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("TAG", "Error when format date time");
-            holder.tvCallLogDate.setText("---");
+            holder.tvCallLogDate.setText(context.getString(R.string.call_log_item_txt_date_with_argument, "---"));
         }
 
         String type;
@@ -64,7 +66,7 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.ViewHo
                 break;
             default: type = "Không xác định";
         }
-        holder.tvCallLogType.setText(type);
+        holder.tvCallLogType.setText(context.getString(R.string.call_log_item_txt_type_with_argument, type));
     }
 
     @Override

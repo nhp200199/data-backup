@@ -60,6 +60,7 @@ public class HomeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setTitle(R.string.home_activity_title);
 
         Intent receivedIntent = getIntent();
         if (receivedIntent != null && receivedIntent.hasExtra(EXTRA_USER_EMAIL)) {
@@ -118,11 +119,11 @@ public class HomeActivity extends BaseActivity {
                     showLoadingDialog();
                     break;
                 case FAIL:
-                    showInformationPopup("Thất bại", "Có lỗi trong quá trình thực hiện. Vui lòng thử lại");
+                    showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
                     break;
                 case SUCCESS:
                     hidePopup();
-                    Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
                     break;
                 default:
             }
@@ -174,7 +175,7 @@ public class HomeActivity extends BaseActivity {
             if (isAllGranted) {
                 mHomeViewModel.backUpData(HomeActivity.this);
             } else {
-                Toast.makeText(this, "Bạn cần cho quyền để thực hiện tác vụ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.toast_permission_not_granted), Toast.LENGTH_SHORT).show();
             }
         }
     }

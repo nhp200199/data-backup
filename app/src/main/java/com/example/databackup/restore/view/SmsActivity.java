@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.databackup.R;
 import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.Contact;
 import com.example.databackup.backup.model.SmsModel;
@@ -41,17 +42,16 @@ public class SmsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySmsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setTitle(R.string.sms_activity_title);
 
         Intent receivedIntent = getIntent();
         if (receivedIntent != null && receivedIntent.hasExtra(EXTRA_DATA_ID)) {
             dataId = receivedIntent.getLongExtra(EXTRA_DATA_ID, 0);
-            Toast.makeText(this, "Data id: " + dataId, Toast.LENGTH_SHORT).show();
         }
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         dataRef = dataRef.child("data/" + mCurrentUser.getEmail() + "/" + dataId + ".json");
-        Toast.makeText(this, dataRef.getPath(), Toast.LENGTH_SHORT).show();
 
         mAdapter = new SmsAdapter(this, new ArrayList<SmsModel>());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -70,7 +70,6 @@ public class SmsActivity extends AppCompatActivity {
                 mAdapter.getCurrentValues().clear();
                 mAdapter.getCurrentValues().addAll(b.getSmsList());
                 mAdapter.notifyDataSetChanged();
-                Toast.makeText(SmsActivity.this, a , Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

@@ -21,10 +21,12 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.ViewHolder>{
 
     private List<SmsModel> smsList;
     private LayoutInflater mInflater;
+    private Context context;
 
     public SmsAdapter(Context context, List<SmsModel> smsModelList) {
         this.mInflater = LayoutInflater.from(context);
         this.smsList = smsModelList;
+        this.context = context;
     }
 
     @NonNull
@@ -37,17 +39,17 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         SmsModel smsModel = smsList.get(position);
-        holder.tvSmsBody.setText(smsModel.getBody());
+        holder.tvSmsBody.setText(context.getString(R.string.sms_item_txt_body_with_argument, smsModel.getBody()));
 
         try {
             Date date = new Date(smsModel.getDate());
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             String formattedDate = sdf.format(date);
-            holder.tvSmsDate.setText(formattedDate);
+            holder.tvSmsDate.setText(context.getString(R.string.sms_item_txt_date_with_argument, formattedDate));
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("TAG", "Error when format date time");
-            holder.tvSmsDate.setText("---");
+            holder.tvSmsDate.setText(context.getString(R.string.sms_item_txt_date_with_argument, "---"));
         }
 
         String type;
@@ -60,7 +62,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.ViewHolder>{
                 break;
             default: type = "Không xác định";
         }
-        holder.tvSmsType.setText(type);
+        holder.tvSmsType.setText(context.getString(R.string.sms_item_txt_type_with_argument, type));
     }
 
     @Override

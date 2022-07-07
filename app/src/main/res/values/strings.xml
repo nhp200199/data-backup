@@ -7,4 +7,25 @@
     <string name="home_activity_title">Trang chủ</string>
     <string name="login_activity_title">Đăng nhập</string>
     <string name="dialog_loading_title">Xin vui lòng chờ</string>
+    <string name="data_overview_activity_txt_contact">Thông tin liên hệ</string>
+    <string name="data_overview_activity_txt_call_lpg">Lịch sử cuộc gọi</string>
+    <string name="data_overview_activity_txt_sms">Tin nhắn</string>
+    <string name="home_activity_btn_back_up">Sao lưu</string>
+    <string name="call_log_item_txt_number_with_argument">SĐT: %s</string>
+    <string name="call_log_item_txt_type_with_argument">Loại cuộc gọi: %s</string>
+    <string name="call_log_item_txt_date_with_argument">Ngày thực hiện: %s</string>
+    <string name="call_log_item_txt_duration_with_argument">Thời gian: %s giây</string>
+    <string name="contact_item_txt_name_with_argument">Họ tên: %s</string>
+    <string name="contact_item_txt_number_with_argument">SĐT: %s</string>
+    <string name="sms_item_txt_type_with_argument">Loại tin nhắn: %s</string>
+    <string name="sms_item_txt_date_with_argument">Thời gian: %s</string>
+    <string name="sms_item_txt_body_with_argument">Nội dung: %s</string>
+    <string name="sms_activity_title">Dữ liệu tin nhắn</string>
+    <string name="contact_activity_title">Dữ liệu liên hệ</string>
+    <string name="call_log_activity_title">Dữ liệu cuộc gọi</string>
+    <string name="data_overview_activity_title">Chi tiết dữ liệu</string>
+    <string name="toast_operation_success">Thành công</string>
+    <string name="operation_popup_title_fail">Thất bại</string>
+    <string name="operation_popup_msg_fail">Có lỗi trong quá trình thực hiện. Vui lòng thử lại</string>
+    <string name="toast_permission_not_granted">Bạn cần cho quyền để thực hiện tác vụ</string>
 </resources>

@@ -42,17 +42,16 @@ public class ContactsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityContactsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setTitle(R.string.contact_activity_title);
 
         Intent receivedIntent = getIntent();
         if (receivedIntent != null && receivedIntent.hasExtra(EXTRA_DATA_ID)) {
             dataId = receivedIntent.getLongExtra(EXTRA_DATA_ID, 0);
-            Toast.makeText(this, "Data id: " + dataId, Toast.LENGTH_SHORT).show();
         }
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         islandRef = islandRef.child("data/" + mCurrentUser.getEmail() + "/" + dataId + ".json");
-        Toast.makeText(this, islandRef.getPath(), Toast.LENGTH_SHORT).show();
 
         mAdapter = new ContactsAdapter(this, new ArrayList<Contact>());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -71,7 +70,6 @@ public class ContactsActivity extends AppCompatActivity {
                 mAdapter.getCurrentContacts().clear();
                 mAdapter.getCurrentContacts().addAll(b.getContacts());
                 mAdapter.notifyDataSetChanged();
-                Toast.makeText(ContactsActivity.this, a , Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

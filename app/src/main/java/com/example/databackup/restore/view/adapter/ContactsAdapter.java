@@ -19,10 +19,12 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
 
     private List<Contact> contacts;
     private LayoutInflater mInflater;
+    private Context context;
 
     public ContactsAdapter(Context context, List<Contact> contacts) {
         this.mInflater = LayoutInflater.from(context);
         this.contacts = contacts;
+        this.context = context;
     }
 
     @NonNull
@@ -35,8 +37,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Contact contact = contacts.get(position);
-        holder.tvContactName.setText(contact.getName());
-        holder.tvContactNumber.setText(contact.getPhoneNumber());
+        holder.tvContactName.setText(context.getString(R.string.contact_item_txt_name_with_argument, contact.getName()));
+        holder.tvContactNumber.setText(context.getString(R.string.contact_item_txt_number_with_argument, contact.getPhoneNumber()));
     }
 
     @Override

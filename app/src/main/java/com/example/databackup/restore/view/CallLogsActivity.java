@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.databackup.R;
 import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.CallLogModel;
 import com.example.databackup.backup.model.Contact;
@@ -42,17 +43,16 @@ public class CallLogsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityCallLogsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setTitle(R.string.call_log_activity_title);
 
         Intent receivedIntent = getIntent();
         if (receivedIntent != null && receivedIntent.hasExtra(EXTRA_DATA_ID)) {
             dataId = receivedIntent.getLongExtra(EXTRA_DATA_ID, 0);
-            Toast.makeText(this, "Data id: " + dataId, Toast.LENGTH_SHORT).show();
         }
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         dataRef = dataRef.child("data/" + mCurrentUser.getEmail() + "/" + dataId + ".json");
-        Toast.makeText(this, dataRef.getPath(), Toast.LENGTH_SHORT).show();
 
         mAdapter = new CallLogsAdapter(this, new ArrayList<CallLogModel>());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -71,7 +71,6 @@ public class CallLogsActivity extends AppCompatActivity {
                 mAdapter.getCurrentValues().clear();
                 mAdapter.getCurrentValues().addAll(b.getCallLogs());
                 mAdapter.notifyDataSetChanged();
-                Toast.makeText(CallLogsActivity.this, a , Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

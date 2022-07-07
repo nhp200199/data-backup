@@ -10,11 +10,11 @@
         android:id="@+id/tv_contact_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="họ và tên: abc"/>
+        android:text="@string/contact_item_txt_name_with_argument"/>
 
     <TextView
         android:id="@+id/tv_contact_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sdt: abc"/>
+        android:text="@string/contact_item_txt_number_with_argument"/>
 </LinearLayout>

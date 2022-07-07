@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.databackup.BaseActivity;
+import com.example.databackup.R;
 import com.example.databackup.backup.view.HomeActivity;
 import com.example.databackup.auth.viewmodel.LoginViewModel;
 import com.example.databackup.databinding.ActivityMainBinding;
@@ -29,6 +30,7 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setTitle(R.string.login_activity_title);
 
         mLoginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
         mLoginViewModel.init(this);
@@ -60,10 +62,10 @@ public class LoginActivity extends BaseActivity {
                     showLoadingDialog();
                     break;
                 case SUCCESS:
-                    Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
                     break;
                 case FAIL:
-                    showInformationPopup("Thất bại", "Có lỗi trong quá trình thực hiện. Vui lòng thử lại");
+                    showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
                     break;
                 default: break;
             }

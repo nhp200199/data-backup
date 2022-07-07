@@ -44,6 +44,6 @@
             android:layout_marginVertical="32dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sao lưu"/>
+            android:text="@string/home_activity_btn_back_up"/>
     </LinearLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
