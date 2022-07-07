@@ -28,6 +28,7 @@ import com.example.databackup.backup.repository.RecordsRepository;
 import com.example.databackup.backup.view.adapter.RecordsAdapter;
 import com.example.databackup.backup.viewmodel.HomeViewModel;
 import com.example.databackup.databinding.ActivityHomeBinding;
+import com.example.databackup.restore.view.DataOverviewActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -80,7 +81,10 @@ public class HomeActivity extends BaseActivity {
                 layoutManager.getOrientation());
         mRecordsAdapter = new RecordsAdapter(this, new ArrayList<Long>());
         mRecordsAdapter.setClickListener((v, index) -> {
-            Toast.makeText(this, "clicked " + index, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(HomeActivity.this, DataOverviewActivity.class);
+            intent.putExtra(DataOverviewActivity.EXTRA_DATA_ID, mRecordsAdapter.getItem(index));
+            startActivity(intent);
+//            Toast.makeText(this, "clicked " + index, Toast.LENGTH_SHORT).show();
         });
         binding.rcvRecords.setAdapter(mRecordsAdapter);
         binding.rcvRecords.setLayoutManager(layoutManager);
@@ -91,12 +95,14 @@ public class HomeActivity extends BaseActivity {
         binding.tvWelcomeUserEmail.setText(String.format(getString(R.string.home_activity_txt_welcome_user_with_argument), userEmail));
         binding.btnBackUp.setOnClickListener(v -> {
             if (!checkPermissions(NEEDED_PERMISSIONS)) {
-                ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS,     ACTION_REQUEST_PERMISSIONS);
+                ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, ACTION_REQUEST_PERMISSIONS);
             }
             else {
                 mHomeViewModel.backUpData(HomeActivity.this);
             }
         });
+
+        //TODO: implement swipe to refresh
     }
 
     @Override

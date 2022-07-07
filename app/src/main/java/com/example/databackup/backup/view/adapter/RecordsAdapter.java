@@ -82,7 +82,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.ViewHold
         }
     }
 
-    long getItem(int id) {
+    public long getItem(int id) {
         return mData.get(id);
     }
 }

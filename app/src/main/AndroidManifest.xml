@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.databackup">
+
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_SMS" />
@@ -13,13 +14,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DataBackup">
         <activity
-            android:name=".backup.view.HomeActivity"
-            android:label="@string/home_activity_title"
+            android:name=".restore.view.CallLogsActivity"
             android:exported="false" />
         <activity
+            android:name=".restore.view.SmsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".restore.view.ContactsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".restore.view.DataOverviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".backup.view.HomeActivity"
+            android:exported="false"
+            android:label="@string/home_activity_title" />
+        <activity
             android:name=".auth.view.LoginActivity"
-            android:label="@string/login_activity_title"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/login_activity_title">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
