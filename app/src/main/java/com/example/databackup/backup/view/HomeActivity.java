@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Intent;
@@ -14,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.databackup.BaseActivity;
@@ -21,12 +25,15 @@ import com.example.databackup.R;
 import com.example.databackup.auth.repository.AuthRepository;
 import com.example.databackup.auth.view.LoginActivity;
 import com.example.databackup.backup.repository.RecordsRepository;
+import com.example.databackup.backup.view.adapter.RecordsAdapter;
 import com.example.databackup.backup.viewmodel.HomeViewModel;
 import com.example.databackup.databinding.ActivityHomeBinding;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -45,6 +52,7 @@ public class HomeActivity extends BaseActivity {
     private ActivityHomeBinding binding;
     private HomeViewModel mHomeViewModel;
     private CompositeDisposable viewSubscription = new CompositeDisposable();
+    private RecordsAdapter mRecordsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +70,24 @@ public class HomeActivity extends BaseActivity {
 
         mHomeViewModel.fetchRecords(userEmail);
 
+        setUpView();
+        setUpViewListeners();
+    }
+
+    private void setUpView() {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this,
+                layoutManager.getOrientation());
+        mRecordsAdapter = new RecordsAdapter(this, new ArrayList<Long>());
+        mRecordsAdapter.setClickListener((v, index) -> {
+            Toast.makeText(this, "clicked " + index, Toast.LENGTH_SHORT).show();
+        });
+        binding.rcvRecords.setAdapter(mRecordsAdapter);
+        binding.rcvRecords.setLayoutManager(layoutManager);
+        binding.rcvRecords.addItemDecoration(dividerItemDecoration);
+    }
+
+    private void setUpViewListeners() {
         binding.tvWelcomeUserEmail.setText(String.format(getString(R.string.home_activity_txt_welcome_user_with_argument), userEmail));
         binding.btnBackUp.setOnClickListener(v -> {
             if (!checkPermissions(NEEDED_PERMISSIONS)) {
@@ -81,15 +107,15 @@ public class HomeActivity extends BaseActivity {
 
     private void makeViewSubscriptions() {
         Disposable backUpStatusDisposable = mHomeViewModel.getBackUpStatusObservable().observeOn(AndroidSchedulers.mainThread()).subscribe(status -> {
-            Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
             switch (status) {
                 case IN_PROGRESS:
-                    Toast.makeText(this, "in_progress", Toast.LENGTH_SHORT).show();
+                    showLoadingDialog();
                     break;
                 case FAIL:
-                    Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
+                    showInformationPopup("Thất bại", "Có lỗi trong quá trình thực hiện. Vui lòng thử lại");
                     break;
                 case SUCCESS:
+                    hidePopup();
                     Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
                     break;
                 default:
@@ -101,6 +127,20 @@ public class HomeActivity extends BaseActivity {
 
         Disposable recordsDisposable = mHomeViewModel.getRecordsObservable().subscribe(longs -> {
             Log.i(TAG, "number of records: " + longs.size());
+            if (longs.size() == 0) {
+                binding.tvRecordsStatus.setVisibility(View.VISIBLE);
+                binding.rcvRecords.setVisibility(View.GONE);
+
+                binding.tvRecordsStatus.setText("Chưa có bản lưu nào");
+            }
+            else {
+                binding.tvRecordsStatus.setVisibility(View.GONE);
+                binding.rcvRecords.setVisibility(View.VISIBLE);
+
+                mRecordsAdapter.getCurrentValues().clear();
+                mRecordsAdapter.getCurrentValues().addAll(longs);
+                mRecordsAdapter.notifyDataSetChanged();
+            }
         });
 
         viewSubscription.add(backUpStatusDisposable);
