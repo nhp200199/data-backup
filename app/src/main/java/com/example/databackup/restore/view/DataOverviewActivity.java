@@ -35,7 +35,7 @@ public class DataOverviewActivity extends AppCompatActivity {
         });
 
         binding.contactsContainer.setOnClickListener(v -> {
-
+            startActivity(new Intent(DataOverviewActivity.this, ContactsActivity.class));
         });
     }
 }

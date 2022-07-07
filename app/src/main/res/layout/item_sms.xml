@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="16dp"
+    android:orientation="vertical"
+    android:paddingVertical="8dp">
+
+    <TextView
+        android:id="@+id/tv_sms_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loai tin nhan: abc"/>
+
+    <TextView
+        android:id="@+id/tv_sms_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thoi gian: abc"/>
+
+    <TextView
+        android:id="@+id/tv_sms_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Noi dung: abc"/>
+</LinearLayout>
