@@ -1,6 +1,7 @@
 package com.example.databackup.backup.model;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,8 @@ public class BackUpData {
     List<Contact> contacts = new ArrayList<Contact>();
     List<SmsModel> smsList = new ArrayList<SmsModel>();
     List<CallLogModel> callLogs = new ArrayList<CallLogModel>();
+
+    public BackUpData() {}
 
     public BackUpData(long backUpDate, List<Contact> contacts, List<SmsModel> smsList, List<CallLogModel> callLogs) {
         this.contacts = contacts;
@@ -52,5 +55,14 @@ public class BackUpData {
 
     public String toJson() {
         return new Gson().toJson(this);
+    }
+    
+    public static BackUpData fromJson(String jsonString) {
+        try {
+            return new Gson().fromJson(jsonString, BackUpData.class);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return new BackUpData();
+        }
     }
 }
