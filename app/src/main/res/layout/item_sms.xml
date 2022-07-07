@@ -13,7 +13,7 @@
         android:text="Loai tin nhan: abc"/>
 
     <TextView
-        android:id="@+id/tv_sms_number"
+        android:id="@+id/tv_sms_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Thoi gian: abc"/>
