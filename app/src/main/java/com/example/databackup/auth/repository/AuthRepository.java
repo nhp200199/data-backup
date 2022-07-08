@@ -3,6 +3,8 @@ package com.example.databackup.auth.repository;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -100,25 +103,47 @@ public class AuthRepository {
         }
     }
 
-    public void firebaseAuthWithGoogle(Context context, GoogleSignInAccount act) {
+    private void firebaseAuthWithGoogle(Context context, GoogleSignInAccount act) {
         if (context instanceof Activity) {
-            loginStatusMutableLiveData.setValue(LoginStatus.IN_PROGRESS);
-            AuthCredential credential = GoogleAuthProvider.getCredential(act.getIdToken(), null);
-            mAuth.signInWithCredential(credential)
-                    .addOnSuccessListener((Activity) context, authResult -> {
-                        Log.i(TAG, "Successfully sign user in");
-                        Log.i(TAG, "User's sign in email: " + authResult.getUser().getEmail());
-                        loginStatusMutableLiveData.setValue(LoginStatus.SUCCESS);
-                        mAuthenticatedUser.setValue(authResult.getUser());
-                    })
-                    .addOnFailureListener((Activity) context, e -> {
-                        Log.e(TAG, "Failed to authenticate with google. Error is: " + e);
-                        loginStatusMutableLiveData.setValue(LoginStatus.FAIL);
-                    });
+            if (hasNetwork(context)) {
+                loginStatusMutableLiveData.setValue(LoginStatus.IN_PROGRESS);
+                AuthCredential credential = GoogleAuthProvider.getCredential(act.getIdToken(), null);
+                mAuth.signInWithCredential(credential)
+                        .addOnSuccessListener((Activity) context, authResult -> {
+                            Log.i(TAG, "Successfully sign user in");
+                            Log.i(TAG, "User's sign in email: " + authResult.getUser().getEmail());
+                            loginStatusMutableLiveData.setValue(LoginStatus.SUCCESS);
+                            mAuthenticatedUser.setValue(authResult.getUser());
+                        })
+                        .addOnFailureListener((Activity) context, e -> {
+                            Log.e(TAG, "Failed to authenticate with google. Error is: " + e);
+                            loginStatusMutableLiveData.setValue(LoginStatus.FAIL);
+                        });
+            }
+            else {
+                loginStatusMutableLiveData.setValue(LoginStatus.FAIL);
+            }
         }
         else {
             Log.e(TAG, "Operation fail. You must pass the activity as the context");
         }
+    }
+
+    public void login(Context context, Intent googleIntent) {
+        try {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(googleIntent);
+            GoogleSignInAccount account = task.getResult(ApiException.class);
+            firebaseAuthWithGoogle(context, account);
+        } catch (Exception e) {
+            loginStatusMutableLiveData.setValue(LoginStatus.FAIL);
+            Log.w(TAG, "Google sign in failed", e);
+        }
+    }
+
+    private boolean hasNetwork(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     public LiveData<FirebaseUser> getAuthenticatedUser() {

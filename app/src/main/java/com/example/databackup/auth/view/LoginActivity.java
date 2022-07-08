@@ -1,6 +1,5 @@
 package com.example.databackup.auth.view;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
@@ -82,14 +81,8 @@ public class LoginActivity extends BaseActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 123) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                mLoginViewModel.firebaseAuthWithGoogle(this, account);
-            } catch (ApiException e) {
-                Log.w(TAG, "Google sign in failed", e);
-            }
+        if (requestCode == SIGN_IN_REQUEST_CODE) {
+            mLoginViewModel.login(this, data);
         }
     }
 }

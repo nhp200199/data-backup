@@ -47,8 +47,12 @@ public class LoginViewModel extends ViewModel {
         return mAuthRepository.getFirebaseUser();
     }
 
-    public void firebaseAuthWithGoogle(Context context, GoogleSignInAccount act) {
-        mAuthRepository.firebaseAuthWithGoogle(context, act);
+    public void login(Context context, Intent googleIntent) {
+        mAuthRepository.login(context, googleIntent);
+    }
+
+    public void login(Intent googleIntent) {
+
     }
 
     public LiveData<FirebaseUser> getAuthenticatedUser() {
