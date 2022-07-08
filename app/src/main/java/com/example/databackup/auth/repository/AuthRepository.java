@@ -140,12 +140,6 @@ public class AuthRepository {
         }
     }
 
-    private boolean hasNetwork(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-    }
-
     public LiveData<FirebaseUser> getAuthenticatedUser() {
         return mAuthenticatedUser;
     }

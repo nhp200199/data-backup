@@ -15,6 +15,7 @@ import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.CallLogModel;
 import com.example.databackup.backup.model.Contact;
 import com.example.databackup.backup.model.SmsModel;
+import com.example.databackup.util.System;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -50,7 +51,7 @@ public class RecordsRepository {
         StorageReference listRef = rootStorageRef.child(email);
         List<Long> records = new ArrayList<>();
 
-        if (hasNetwork(context)) {
+        if (System.hasNetwork(context)) {
             Task<ListResult> listResultTask = listRef.listAll()
                     .addOnSuccessListener(new OnSuccessListener<ListResult>() {
                         @Override
@@ -120,12 +121,6 @@ public class RecordsRepository {
             Log.i(TAG, "There is no user logged in");
             return Observable.error(Exception::new);
         }
-    }
-
-    private boolean hasNetwork(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     private Observable<List<Contact>> getContacts(Context context) {
