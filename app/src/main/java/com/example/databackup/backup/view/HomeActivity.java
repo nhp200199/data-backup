@@ -138,7 +138,7 @@ public class HomeActivity extends BaseActivity {
                 binding.tvRecordsStatus.setVisibility(View.VISIBLE);
                 binding.rcvRecords.setVisibility(View.GONE);
 
-                binding.tvRecordsStatus.setText("Chưa có bản lưu nào");
+                binding.tvRecordsStatus.setText(R.string.txt_no_records);
             }
             else {
                 binding.tvRecordsStatus.setVisibility(View.GONE);

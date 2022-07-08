@@ -1,6 +1,8 @@
 package com.example.databackup.backup.viewmodel;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import androidx.lifecycle.ViewModel;
 
@@ -45,11 +47,22 @@ public class HomeViewModel extends ViewModel {
 
     public void backUpData(Context context) {
         backUpStatusSubject.onNext(BackUpStatus.IN_PROGRESS);
-        Disposable disposable = mRecordsRepository.backUpData(context).subscribe(backUpData -> {
-            backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
-            mRecordsRepository.putRecord(backUpData.getBackUpDate());
-        }, e -> backUpStatusSubject.onNext(BackUpStatus.FAIL));
-        compositeDisposable.add(disposable);
+        if (hasNetwork(context)) {
+            Disposable disposable = mRecordsRepository.backUpData(context).subscribe(backUpData -> {
+                backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
+                mRecordsRepository.putRecord(backUpData.getBackUpDate());
+            }, e -> backUpStatusSubject.onNext(BackUpStatus.FAIL));
+            compositeDisposable.add(disposable);
+        }
+        else {
+            backUpStatusSubject.onNext(BackUpStatus.FAIL);
+        }
+    }
+
+    private boolean hasNetwork(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     public void fetchRecords(String email) {

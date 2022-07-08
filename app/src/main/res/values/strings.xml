@@ -28,4 +28,5 @@
     <string name="operation_popup_title_fail">Thất bại</string>
     <string name="operation_popup_msg_fail">Có lỗi trong quá trình thực hiện. Vui lòng thử lại</string>
     <string name="toast_permission_not_granted">Bạn cần cho quyền để thực hiện tác vụ</string>
+    <string name="txt_no_records">Chưa có bản lưu nào</string>
 </resources>
