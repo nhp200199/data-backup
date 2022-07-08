@@ -17,7 +17,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class HomeViewModel extends ViewModel {
-    public enum BackUpStatus {
+    public enum OperationStatus {
         INITIAL,
         IN_PROGRESS,
         SUCCESS,
@@ -27,7 +27,8 @@ public class HomeViewModel extends ViewModel {
     private static final String TAG = HomeViewModel.class.getSimpleName();
     private AuthRepository mAuthRepository;
     private RecordsRepository mRecordsRepository;
-    private BehaviorSubject<BackUpStatus> backUpStatusSubject = BehaviorSubject.createDefault(BackUpStatus.INITIAL);
+    private BehaviorSubject<OperationStatus> backUpStatusSubject = BehaviorSubject.createDefault(OperationStatus.INITIAL);
+    private BehaviorSubject<OperationStatus> fetchRecordsStatusSubject = BehaviorSubject.createDefault(OperationStatus.INITIAL);
     private Observable<List<Long>> recordsObservable;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -41,21 +42,21 @@ public class HomeViewModel extends ViewModel {
         mAuthRepository.signOut(context);
     }
 
-    public Observable<BackUpStatus> getBackUpStatusObservable() {
+    public Observable<OperationStatus> getBackUpStatusObservable() {
         return backUpStatusSubject.hide();
     }
 
     public void backUpData(Context context) {
-        backUpStatusSubject.onNext(BackUpStatus.IN_PROGRESS);
+        backUpStatusSubject.onNext(OperationStatus.IN_PROGRESS);
         if (hasNetwork(context)) {
             Disposable disposable = mRecordsRepository.backUpData(context).subscribe(backUpData -> {
-                backUpStatusSubject.onNext(BackUpStatus.SUCCESS);
+                backUpStatusSubject.onNext(OperationStatus.SUCCESS);
                 mRecordsRepository.putRecord(backUpData.getBackUpDate());
-            }, e -> backUpStatusSubject.onNext(BackUpStatus.FAIL));
+            }, e -> backUpStatusSubject.onNext(OperationStatus.FAIL));
             compositeDisposable.add(disposable);
         }
         else {
-            backUpStatusSubject.onNext(BackUpStatus.FAIL);
+            backUpStatusSubject.onNext(OperationStatus.FAIL);
         }
     }
 
@@ -65,12 +66,27 @@ public class HomeViewModel extends ViewModel {
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
-    public void fetchRecords(String email) {
-        mRecordsRepository.fetchAll(email);
+    public void fetchRecords(Context context, String email) {
+        fetchRecordsStatusSubject.onNext(OperationStatus.IN_PROGRESS);
+        if (hasNetwork(context)) {
+            Disposable fetchRecordDisposable = mRecordsRepository.fetchRecords(email).subscribe(records -> {
+                fetchRecordsStatusSubject.onNext(OperationStatus.SUCCESS);
+            }, e ->{
+                fetchRecordsStatusSubject.onNext(OperationStatus.FAIL);
+            });
+            compositeDisposable.add(fetchRecordDisposable);
+        }
+        else {
+            fetchRecordsStatusSubject.onNext(OperationStatus.FAIL);
+        }
     }
 
     public Observable<List<Long>> getRecordsObservable() {
         return recordsObservable;
+    }
+
+    public Observable<OperationStatus> getFetchRecordsObservable() {
+        return fetchRecordsStatusSubject.hide();
     }
 
     public void tearDown() {

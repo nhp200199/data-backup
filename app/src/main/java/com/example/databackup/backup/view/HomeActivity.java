@@ -70,7 +70,7 @@ public class HomeActivity extends BaseActivity {
         mHomeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         mHomeViewModel.init(this);
 
-        mHomeViewModel.fetchRecords(userEmail);
+        mHomeViewModel.fetchRecords(this, userEmail);
 
         setUpView();
         setUpViewListeners();
@@ -150,8 +150,30 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
+        Disposable fetchRecordsStatusDisposable = mHomeViewModel.getFetchRecordsObservable().subscribe(status -> {
+            Log.i(TAG, "fetch status: " + status);
+            switch (status) {
+                case IN_PROGRESS:
+                    showLoadingDialog();
+                    break;
+                case FAIL:
+                    binding.tvRecordsStatus.setVisibility(View.VISIBLE);
+                    binding.rcvRecords.setVisibility(View.GONE);
+
+                    binding.tvRecordsStatus.setText(getString(R.string.operation_popup_msg_fail));
+//                    showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
+                    break;
+                case SUCCESS:
+                    hidePopup();
+//                    Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+            }
+        });
+
         viewSubscription.add(backUpStatusDisposable);
         viewSubscription.add(recordsDisposable);
+        viewSubscription.add(fetchRecordsStatusDisposable);
     }
 
     @Override

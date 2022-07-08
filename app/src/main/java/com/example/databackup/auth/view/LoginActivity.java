@@ -61,6 +61,7 @@ public class LoginActivity extends BaseActivity {
                     showLoadingDialog();
                     break;
                 case SUCCESS:
+                    hidePopup();
                     Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
                     break;
                 case FAIL:

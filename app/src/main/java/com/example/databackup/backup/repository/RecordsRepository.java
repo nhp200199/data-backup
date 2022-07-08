@@ -43,7 +43,7 @@ public class RecordsRepository {
         rootStorageRef = storage.getReference(ROOT);
     }
 
-    public void fetchAll(String email) {
+    public Observable<List<Long>> fetchRecords(String email) {
         StorageReference listRef = rootStorageRef.child(email);
         List<Long> records = new ArrayList<>();
 
@@ -72,6 +72,7 @@ public class RecordsRepository {
                         recordsSubject.onError(e);
                     }
                 });
+        return recordsSubject.hide();
     }
 
     private Observable<BackUpData> retrieveBackUpData(Context context) {
