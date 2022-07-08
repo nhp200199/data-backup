@@ -69,7 +69,7 @@ public class HomeViewModel extends ViewModel {
     public void fetchRecords(Context context, String email) {
         fetchRecordsStatusSubject.onNext(OperationStatus.IN_PROGRESS);
         if (hasNetwork(context)) {
-            Disposable fetchRecordDisposable = mRecordsRepository.fetchRecords(email).subscribe(records -> {
+            Disposable fetchRecordDisposable = mRecordsRepository.fetchRecords(context, email).subscribe(records -> {
                 fetchRecordsStatusSubject.onNext(OperationStatus.SUCCESS);
             }, e ->{
                 fetchRecordsStatusSubject.onNext(OperationStatus.FAIL);

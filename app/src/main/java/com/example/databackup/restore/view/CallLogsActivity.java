@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.databackup.BaseActivity;
 import com.example.databackup.R;
 import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.CallLogModel;
@@ -19,6 +20,7 @@ import com.example.databackup.databinding.ActivityCallLogsBinding;
 import com.example.databackup.databinding.ActivityContactsBinding;
 import com.example.databackup.restore.view.adapter.CallLogsAdapter;
 import com.example.databackup.restore.view.adapter.ContactsAdapter;
+import com.example.databackup.util.System;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +31,7 @@ import com.google.firebase.storage.StorageReference;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class CallLogsActivity extends AppCompatActivity {
+public class CallLogsActivity extends BaseActivity {
 
     FirebaseStorage storageRef = FirebaseStorage.getInstance();
     FirebaseUser mCurrentUser;
@@ -62,21 +64,36 @@ public class CallLogsActivity extends AppCompatActivity {
         binding.rcvCallLogs.setLayoutManager(layoutManager);
         binding.rcvCallLogs.addItemDecoration(dividerItemDecoration);
 
-        final long ONE_MEGABYTE = 5 * 1024 * 1024;
-        dataRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                String a = new String(bytes, StandardCharsets.UTF_8);
-                BackUpData b = BackUpData.fromJson(a);
-                mAdapter.getCurrentValues().clear();
-                mAdapter.getCurrentValues().addAll(b.getCallLogs());
-                mAdapter.notifyDataSetChanged();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-            }
-        });
+        fetchCallLogsData();
+    }
+
+    private void fetchCallLogsData() {
+        if (System.hasNetwork(this)) {
+            showLoadingDialog();
+
+            final long ONE_MEGABYTE = 5 * 1024 * 1024;
+            dataRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    hidePopup();
+
+                    String a = new String(bytes, StandardCharsets.UTF_8);
+                    BackUpData b = BackUpData.fromJson(a);
+                    mAdapter.getCurrentValues().clear();
+                    mAdapter.getCurrentValues().addAll(b.getCallLogs());
+                    mAdapter.notifyDataSetChanged();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    hidePopup();
+                    // Handle any errors
+                    showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
+                }
+            });
+        }
+        else {
+            showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
+        }
     }
 }

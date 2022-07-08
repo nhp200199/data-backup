@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.Manifest;
 import android.content.Intent;
@@ -103,7 +104,9 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
-        //TODO: implement swipe to refresh
+        binding.swRefreshRecords.setOnRefreshListener(() -> {
+            mHomeViewModel.fetchRecords(HomeActivity.this, userEmail);
+        });
     }
 
     @Override
@@ -157,6 +160,12 @@ public class HomeActivity extends BaseActivity {
                     showLoadingDialog();
                     break;
                 case FAIL:
+                    hidePopup();
+
+                    if (binding.swRefreshRecords.isRefreshing()) {
+                        binding.swRefreshRecords.setRefreshing(false);
+                    }
+
                     binding.tvRecordsStatus.setVisibility(View.VISIBLE);
                     binding.rcvRecords.setVisibility(View.GONE);
 
@@ -164,6 +173,12 @@ public class HomeActivity extends BaseActivity {
 //                    showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
                     break;
                 case SUCCESS:
+                    hidePopup();
+
+                    if (binding.swRefreshRecords.isRefreshing()) {
+                        binding.swRefreshRecords.setRefreshing(false);
+                    }
+
                     hidePopup();
 //                    Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
                     break;

@@ -11,12 +11,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.databackup.BaseActivity;
 import com.example.databackup.R;
 import com.example.databackup.backup.model.BackUpData;
 import com.example.databackup.backup.model.Contact;
 import com.example.databackup.databinding.ActivityContactsBinding;
 import com.example.databackup.databinding.ActivityDataOverviewBinding;
 import com.example.databackup.restore.view.adapter.ContactsAdapter;
+import com.example.databackup.util.System;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,7 +30,7 @@ import com.google.gson.Gson;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class ContactsActivity extends AppCompatActivity {
+public class ContactsActivity extends BaseActivity {
 
     FirebaseStorage storageRef = FirebaseStorage.getInstance();
     FirebaseUser mCurrentUser;
@@ -61,21 +63,36 @@ public class ContactsActivity extends AppCompatActivity {
         binding.rcvContacts.setLayoutManager(layoutManager);
         binding.rcvContacts.addItemDecoration(dividerItemDecoration);
 
-        final long ONE_MEGABYTE = 5 * 1024 * 1024;
-        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                String a = new String(bytes, StandardCharsets.UTF_8);
-                BackUpData b = BackUpData.fromJson(a);
-                mAdapter.getCurrentContacts().clear();
-                mAdapter.getCurrentContacts().addAll(b.getContacts());
-                mAdapter.notifyDataSetChanged();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-            }
-        });
+        fetchContactsData();
+    }
+
+    private void fetchContactsData() {
+        if (System.hasNetwork(this)) {
+            showLoadingDialog();
+
+            final long ONE_MEGABYTE = 5 * 1024 * 1024;
+            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    hidePopup();
+
+                    String a = new String(bytes, StandardCharsets.UTF_8);
+                    BackUpData b = BackUpData.fromJson(a);
+                    mAdapter.getCurrentContacts().clear();
+                    mAdapter.getCurrentContacts().addAll(b.getContacts());
+                    mAdapter.notifyDataSetChanged();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    hidePopup();
+                    // Handle any errors
+                    showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
+                }
+            });
+        }
+        else {
+            showInformationPopup(getString(R.string.operation_popup_title_fail), getString(R.string.operation_popup_msg_fail));
+        }
     }
 }

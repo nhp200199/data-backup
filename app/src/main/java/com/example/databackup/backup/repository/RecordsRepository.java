@@ -2,6 +2,8 @@ package com.example.databackup.backup.repository;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.Telephony;
@@ -15,6 +17,7 @@ import com.example.databackup.backup.model.Contact;
 import com.example.databackup.backup.model.SmsModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -43,35 +46,39 @@ public class RecordsRepository {
         rootStorageRef = storage.getReference(ROOT);
     }
 
-    public Observable<List<Long>> fetchRecords(String email) {
+    public Observable<List<Long>> fetchRecords(Context context, String email) {
         StorageReference listRef = rootStorageRef.child(email);
         List<Long> records = new ArrayList<>();
 
-        listRef.listAll()
-                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-                        for (StorageReference item : listResult.getItems()) {
-                            try {
-                                String timeStampFromJsonFile = item.getName().substring(0, item.getName().indexOf('.'));
-                                records.add(Long.parseLong(timeStampFromJsonFile));
-                            } catch (Exception e){
-                                e.printStackTrace();
-                                Log.e(TAG, "Error when parsing timestamps from json file's name");
-                                recordsSubject.onError(e);
+        if (hasNetwork(context)) {
+            Task<ListResult> listResultTask = listRef.listAll()
+                    .addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                        @Override
+                        public void onSuccess(ListResult listResult) {
+                            for (StorageReference item : listResult.getItems()) {
+                                try {
+                                    String timeStampFromJsonFile = item.getName().substring(0, item.getName().indexOf('.'));
+                                    records.add(Long.parseLong(timeStampFromJsonFile));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Log.e(TAG, "Error when parsing timestamps from json file's name");
+                                    recordsSubject.onError(e);
+                                }
                             }
+                            recordsSubject.onNext(records);
                         }
-                        recordsSubject.onNext(records);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Error when fetching records from Firebase " + e.toString());
-                        recordsSubject.onError(e);
-                    }
-                });
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "Error when fetching records from Firebase " + e.toString());
+                            recordsSubject.onError(e);
+                        }
+                    });
+        } else {
+            recordsSubject.onError(new Exception());
+        }
         return recordsSubject.hide();
     }
 
@@ -87,11 +94,11 @@ public class RecordsRepository {
         long backUpDate = new Date().getTime();
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
-           return retrieveBackUpData(context).flatMap(backUpData -> {
-               // Create file metadata including the content type
-               StorageMetadata metadata = new StorageMetadata.Builder()
-                       .setContentType("application/json")
-                       .build();
+            return retrieveBackUpData(context).flatMap(backUpData -> {
+                // Create file metadata including the content type
+                StorageMetadata metadata = new StorageMetadata.Builder()
+                        .setContentType("application/json")
+                        .build();
 
                 backUpData.setBackUpDate(backUpDate);
                 String email = currentUser.getEmail();
@@ -102,17 +109,23 @@ public class RecordsRepository {
                         emitter.onNext(backUpData);
                         emitter.onComplete();
                     })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error when back up data to Firebase. " + e.toString());
-                        e.printStackTrace();
-                        emitter.onError(e);
-                    });
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error when back up data to Firebase. " + e.toString());
+                                e.printStackTrace();
+                                emitter.onError(e);
+                            });
                 });
             });
         } else {
             Log.i(TAG, "There is no user logged in");
             return Observable.error(Exception::new);
         }
+    }
+
+    private boolean hasNetwork(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     private Observable<List<Contact>> getContacts(Context context) {
@@ -137,13 +150,11 @@ public class RecordsRepository {
                 }
                 emitter.onNext(contacts);
                 emitter.onComplete();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error when getting contacts. " + e);
                 e.printStackTrace();
                 emitter.onError(e);
-            }
-            finally {
+            } finally {
                 if (cursor != null)
                     cursor.close();
             }
@@ -179,13 +190,11 @@ public class RecordsRepository {
                 }
                 emitter.onNext(callLogs);
                 emitter.onComplete();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error when getting call logs. " + e);
                 e.printStackTrace();
                 emitter.onError(e);
-            }
-            finally {
+            } finally {
                 if (cursor != null)
                     cursor.close();
             }
@@ -219,13 +228,11 @@ public class RecordsRepository {
                 }
                 emitter.onNext(smsList);
                 emitter.onComplete();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error when getting SMS. " + e);
                 e.printStackTrace();
                 emitter.onError(e);
-            }
-            finally {
+            } finally {
                 if (cursor != null)
                     cursor.close();
             }
