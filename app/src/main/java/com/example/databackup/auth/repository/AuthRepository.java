@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.databackup.R;
+import com.example.databackup.util.System;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -105,7 +106,7 @@ public class AuthRepository {
 
     private void firebaseAuthWithGoogle(Context context, GoogleSignInAccount act) {
         if (context instanceof Activity) {
-            if (hasNetwork(context)) {
+            if (System.hasNetwork(context)) {
                 loginStatusMutableLiveData.setValue(LoginStatus.IN_PROGRESS);
                 AuthCredential credential = GoogleAuthProvider.getCredential(act.getIdToken(), null);
                 mAuth.signInWithCredential(credential)
@@ -138,12 +139,6 @@ public class AuthRepository {
             loginStatusMutableLiveData.setValue(LoginStatus.FAIL);
             Log.w(TAG, "Google sign in failed", e);
         }
-    }
-
-    private boolean hasNetwork(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     public LiveData<FirebaseUser> getAuthenticatedUser() {

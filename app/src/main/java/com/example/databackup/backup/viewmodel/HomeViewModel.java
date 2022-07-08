@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.databackup.auth.repository.AuthRepository;
 import com.example.databackup.backup.repository.RecordsRepository;
+import com.example.databackup.util.System;
 
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class HomeViewModel extends ViewModel {
 
     public void backUpData(Context context) {
         backUpStatusSubject.onNext(OperationStatus.IN_PROGRESS);
-        if (hasNetwork(context)) {
+        if (System.hasNetwork(context)) {
             Disposable disposable = mRecordsRepository.backUpData(context).subscribe(backUpData -> {
                 backUpStatusSubject.onNext(OperationStatus.SUCCESS);
                 mRecordsRepository.putRecord(backUpData.getBackUpDate());
@@ -60,15 +61,9 @@ public class HomeViewModel extends ViewModel {
         }
     }
 
-    private boolean hasNetwork(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-    }
-
     public void fetchRecords(Context context, String email) {
         fetchRecordsStatusSubject.onNext(OperationStatus.IN_PROGRESS);
-        if (hasNetwork(context)) {
+        if (System.hasNetwork(context)) {
             Disposable fetchRecordDisposable = mRecordsRepository.fetchRecords(context, email).subscribe(records -> {
                 fetchRecordsStatusSubject.onNext(OperationStatus.SUCCESS);
             }, e ->{
