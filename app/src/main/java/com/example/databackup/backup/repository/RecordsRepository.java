@@ -56,9 +56,10 @@ public class RecordsRepository {
                     .addOnSuccessListener(new OnSuccessListener<ListResult>() {
                         @Override
                         public void onSuccess(ListResult listResult) {
-                            for (StorageReference item : listResult.getItems()) {
+                            for (int i = listResult.getItems().size() - 1; i >= 0; i--) {
+                                StorageReference itemReference = listResult.getItems().get(i);
                                 try {
-                                    String timeStampFromJsonFile = item.getName().substring(0, item.getName().indexOf('.'));
+                                    String timeStampFromJsonFile = itemReference.getName().substring(0, itemReference.getName().indexOf('.'));
                                     records.add(Long.parseLong(timeStampFromJsonFile));
                                 } catch (Exception e) {
                                     e.printStackTrace();

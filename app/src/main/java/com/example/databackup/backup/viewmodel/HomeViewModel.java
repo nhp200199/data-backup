@@ -87,4 +87,9 @@ public class HomeViewModel extends ViewModel {
     public void tearDown() {
         compositeDisposable.dispose();
     }
+
+    public void resetLoadingStates() {
+        fetchRecordsStatusSubject.onNext(OperationStatus.INITIAL);
+        backUpStatusSubject.onNext(OperationStatus.INITIAL);
+    }
 }

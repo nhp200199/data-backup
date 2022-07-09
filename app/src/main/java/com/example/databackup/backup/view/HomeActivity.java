@@ -178,9 +178,7 @@ public class HomeActivity extends BaseActivity {
                     if (binding.swRefreshRecords.isRefreshing()) {
                         binding.swRefreshRecords.setRefreshing(false);
                     }
-
-                    hidePopup();
-//                    Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
+                    //                    Toast.makeText(this, getString(R.string.toast_operation_success), Toast.LENGTH_SHORT).show();
                     break;
                 default:
             }
@@ -194,11 +192,12 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        mHomeViewModel.resetLoadingStates();
         clearViewSubscriptions();
     }
 
     private void clearViewSubscriptions() {
-        viewSubscription.dispose();
+        viewSubscription.clear();
     }
 
     @Override
