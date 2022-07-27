@@ -29,7 +29,7 @@
             android:name=".backup.view.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".auth.view.LoginActivity"
+            android:name=".LoginKotlinActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
